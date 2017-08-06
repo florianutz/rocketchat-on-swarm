@@ -1,0 +1,41 @@
+version: "3.1"
+services:
+    rocketchat:
+        image: rocketchat/rocket.chat:latest
+        volumes:
+          - uploads:/app/uploads
+        environment:
+          - PORT=3000
+          - ROOT_URL=http://localhost:3000
+          - MONGO_URL=mongodb://rs1,rs2,rs3/rocketchat?replicaSet=rs0
+        depends_on:
+          - mongo
+        ports:
+          - 3000:3000
+        deploy:
+          replicas: 3
+    rs1:
+      image: mongo:3.4
+      command: mongod --smallfiles --oplogSize 128 --replSet rs0
+      volumes:
+        - db-data1:/data/db
+    rs2:
+      image: mongo:3.4
+      command: mongod --smallfiles --oplogSize 128 --replSet rs0
+      volumes:
+        - db-data2:/data/db
+    rs3:
+      image: mongo:3.4
+      command: mongod --smallfiles --oplogSize 128 --replSet rs0
+      volumes:
+        - db-data3:/data/db
+
+    mongo-init-replica:
+      image: florianutz/mongo-replica:latest
+
+volumes:
+  db-data1:
+  db-data2:
+  db-data3:
+  uploads:
+
